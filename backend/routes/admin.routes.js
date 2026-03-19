@@ -63,13 +63,15 @@ router.delete('/events/:eventId', async (req, res) => {
 const nodemailer = require('nodemailer');
 
 const transporter = nodemailer.createTransport({
-    service: 'gmail',
+    host: 'smtp.gmail.com',
+    port: 587,
+    secure: false, // TLS
     auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS
-    }
+    },
+    connectionTimeout: 10000
 });
-
 // @desc    Create Student Users for an Event
 // @route   POST /api/admin/users
 router.post('/users', async (req, res) => {
@@ -104,7 +106,7 @@ router.post('/users', async (req, res) => {
                 try {
                     await transporter.sendMail(mailOptions);
                 } catch(err) {
-                    console.log('Failed to send email to', user.username, err.message);
+                    console.log('❌ Failed to send email to', user.email, err);
                 }
             }
         }
