@@ -60,19 +60,27 @@ router.delete('/events/:eventId', async (req, res) => {
     }
 });
 
-const { Resend } = require('resend');
-const resend = new Resend(process.env.RESEND_API_KEY);
-
+const nodemailer = require('nodemailer');
 const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
-    port: 587,
-    secure: false, // TLS
+    port: 465,
+    secure: true,
     auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS
-    },
-    connectionTimeout: 10000
+    }
 });
+
+// Verify transporter on startup
+transporter.verify((error) => {
+    if (error) {
+        console.error('❌ Email transporter error:', error.message);
+    } else {
+        console.log('✅ Email transporter ready');
+    }
+});
+
+
 // @desc    Create Student Users for an Event
 // @route   POST /api/admin/users
 router.post('/users', async (req, res) => {
@@ -96,28 +104,26 @@ router.post('/users', async (req, res) => {
             });
             createdUsers.push(newUser);
 
-            // Send Email if EMAIL_USER is configured and email is provided
-            if (process.env.EMAIL_USER && process.env.EMAIL_PASS && user.email) {
-                const mailOptions = {
-                    from: process.env.EMAIL_USER,
-                    to: user.email,
-                    subject: `Registration for ${event.name}`,
-                    html: `<h3>Hello,</h3><p>You have been registered for <strong>${event.name}</strong>.</p><p>Your login details are:</p><ul><li><strong>Username:</strong> ${user.username}</li><li><strong>Password:</strong> ${user.password}</li><li><strong>Event ID:</strong> ${event.eventId}</li></ul><p>Good luck!</p>`
-                };
+            // Send Email if email is provided
+            console.log('📧 Email check — user.email:', user.email, '| EMAIL_USER:', process.env.EMAIL_USER);
+            if (user.email && user.email !== '') {
                 try {
-                    await resend.emails.send({
-    from: 'onboarding@resend.dev',
-    to: user.email,
-    subject: `Registration for ${event.name}`,
-    html: `<h3>Hello,</h3>
-           <p>You have been registered for <strong>${event.name}</strong>.</p>
-           <p><strong>Username:</strong> ${user.username}</p>
-           <p><strong>Password:</strong> ${user.password}</p>
-           <p><strong>Event ID:</strong> ${event.eventId}</p>`
-});
+                    const info = await transporter.sendMail({
+                        from: `"Tech Event" <${process.env.EMAIL_USER}>`,
+                        to: user.email,
+                        subject: `Registration for ${event.name}`,
+                        html: `<h3>Hello,</h3>
+                               <p>You have been registered for <strong>${event.name}</strong>.</p>
+                               <p><strong>Username:</strong> ${user.username}</p>
+                               <p><strong>Password:</strong> ${user.password}</p>
+                               <p><strong>Event ID:</strong> ${event.eventId}</p>`
+                    });
+                    console.log('✅ Email sent to', user.email, '| messageId:', info.messageId);
                 } catch(err) {
-                    console.log('❌ Failed to send email to', user.email, err);
+                    console.error('❌ Failed to send email to', user.email, '| Error:', err.message);
                 }
+            } else {
+                console.log('⚠️ Skipped email — no email provided for user:', user.username);
             }
         }
 
