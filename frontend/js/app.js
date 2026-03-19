@@ -572,7 +572,7 @@ class App {
 
 // Initialize App
 let app;
-const socket = (typeof io !== 'undefined') ? io('http://localhost:5000') : null;
+const socket = (typeof io !== 'undefined') ? io('https://tech-event-uvmv.onrender.com') : null;
 window.socket = socket;
 
 if (socket) {

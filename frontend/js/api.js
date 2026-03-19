@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:5000/api';
+const API_URL = 'https://tech-event-uvmv.onrender.com/api';
 
 class ApiService {
     static getToken() {

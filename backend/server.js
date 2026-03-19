@@ -28,7 +28,10 @@ const http = require('http');
 const server = http.createServer(app);
 const { Server } = require("socket.io");
 const io = new Server(server, {
-    cors: { origin: "*" }
+    cors: {
+        origin: "https://csetechevent.netlify.app",
+        methods: ["GET", "POST"]
+    }
 });
 
 let activeStudents = 0;
