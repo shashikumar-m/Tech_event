@@ -60,7 +60,8 @@ router.delete('/events/:eventId', async (req, res) => {
     }
 });
 
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 const transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -102,9 +103,21 @@ router.post('/users', async (req, res) => {
                     html: `<h3>Hello,</h3><p>You have been registered for <strong>${event.name}</strong>.</p><p>Your login details are:</p><ul><li><strong>Username:</strong> ${user.username}</li><li><strong>Password:</strong> ${user.password}</li><li><strong>Event ID:</strong> ${event.eventId}</li></ul><p>Good luck!</p>`
                 };
                 try {
-                    await transporter.sendMail(mailOptions);
+                    await resend.emails.send({
+  from: 'mulimani.shashikumar@gmail.com',
+  to: user.email,
+  subject: `Registration for ${event.name}`,
+  html: `<h3>Hello,</h3>
+         <p>You have been registered for <strong>${event.name}</strong>.</p>
+         <p>Your login details:</p>
+         <ul>
+           <li><strong>Username:</strong> ${user.username}</li>
+           <li><strong>Password:</strong> ${user.password}</li>
+           <li><strong>Event ID:</strong> ${event.eventId}</li>
+         </ul>`
+});
                 } catch(err) {
-                    console.log('Failed to send email to', user.username, err.message);
+                    console.log('EMAIL ERROR FULL:', err);
                 }
             }
         }
