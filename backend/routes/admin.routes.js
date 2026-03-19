@@ -1,6 +1,3 @@
-const { Resend } = require('resend');
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 const express = require('express');
 const router = express.Router();
 const Event = require('../models/Event');
@@ -63,9 +60,15 @@ router.delete('/events/:eventId', async (req, res) => {
     }
 });
 
+const nodemailer = require('nodemailer');
 
-
-
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+    }
+});
 
 // @desc    Create Student Users for an Event
 // @route   POST /api/admin/users
@@ -91,28 +94,19 @@ router.post('/users', async (req, res) => {
             createdUsers.push(newUser);
 
             // Send Email if EMAIL_USER is configured and email is provided
-           if (user.email) {
-    try {
-        await resend.emails.send({
-            from: 'noreply@yourdomain.com',
-            to: user.email,
-            subject: `Registration for ${event.name}`,
-            html: `<h3>Hello,</h3>
-                   <p>You have been registered for <strong>${event.name}</strong>.</p>
-                   <p>Your login details:</p>
-                   <ul>
-                     <li><strong>Username:</strong> ${user.username}</li>
-                     <li><strong>Password:</strong> ${user.password}</li>
-                     <li><strong>Event ID:</strong> ${event.eventId}</li>
-                   </ul>`
-        });
-
-        console.log("Email sent to:", user.email);
-
-    } catch (err) {
-        console.log("EMAIL ERROR FULL:", err);
-    }
-}
+            if (process.env.EMAIL_USER && process.env.EMAIL_PASS && user.email) {
+                const mailOptions = {
+                    from: process.env.EMAIL_USER,
+                    to: user.email,
+                    subject: `Registration for ${event.name}`,
+                    html: `<h3>Hello,</h3><p>You have been registered for <strong>${event.name}</strong>.</p><p>Your login details are:</p><ul><li><strong>Username:</strong> ${user.username}</li><li><strong>Password:</strong> ${user.password}</li><li><strong>Event ID:</strong> ${event.eventId}</li></ul><p>Good luck!</p>`
+                };
+                try {
+                    await transporter.sendMail(mailOptions);
+                } catch(err) {
+                    console.log('Failed to send email to', user.username, err.message);
+                }
+            }
         }
 
         res.status(201).json({ message: `${createdUsers.length} users created successfully` });
