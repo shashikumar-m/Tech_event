@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>College Event Quiz & Coding Platform</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <!-- Monaco Editor Script -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.40.0/min/vs/loader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Dynamic content will be injected here -->
+    </div>
+    
+    <!-- Fullscreen warning modal -->
+    <div id="warning-modal" class="modal hidden">
+        <div class="modal-content glass-panel">
+            <h2>⚠️ Warning</h2>
+            <p>You have switched tabs or lost focus. This violates the exam rules.</p>
+            <p id="violation-count">Violations: 0/3</p>
+            <button id="btn-acknowledge-warning" class="btn primary">I Understand</button>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/api.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/exam.js"></script>
+</body>
+</html>
