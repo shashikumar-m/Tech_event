@@ -54,7 +54,7 @@ router.post('/login', async (req, res) => {
 
 // @desc    Create first admin (Temporary route just to seed data if needed)
 // @route   POST /api/auth/seed-admin
-router.post('/seed-admin', async (req, res) => {
+router.get('/seed-admin', async (req, res) => {
     try {
         const adminExists = await User.findOne({ role: 'admin' });
         if(adminExists) {
