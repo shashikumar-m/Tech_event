@@ -1,3 +1,5 @@
+const nodemailer = require('nodemailer');
+
 const express = require('express');
 const router = express.Router();
 const Event = require('../models/Event');
@@ -60,8 +62,7 @@ router.delete('/events/:eventId', async (req, res) => {
     }
 });
 
-const { Resend } = require('resend');
-const resend = new Resend(process.env.RESEND_API_KEY);
+
 
 const transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -103,18 +104,18 @@ router.post('/users', async (req, res) => {
                     html: `<h3>Hello,</h3><p>You have been registered for <strong>${event.name}</strong>.</p><p>Your login details are:</p><ul><li><strong>Username:</strong> ${user.username}</li><li><strong>Password:</strong> ${user.password}</li><li><strong>Event ID:</strong> ${event.eventId}</li></ul><p>Good luck!</p>`
                 };
                 try {
-                    await resend.emails.send({
-  from: 'mulimani.shashikumar@gmail.com',
-  to: user.email,
-  subject: `Registration for ${event.name}`,
-  html: `<h3>Hello,</h3>
-         <p>You have been registered for <strong>${event.name}</strong>.</p>
-         <p>Your login details:</p>
-         <ul>
-           <li><strong>Username:</strong> ${user.username}</li>
-           <li><strong>Password:</strong> ${user.password}</li>
-           <li><strong>Event ID:</strong> ${event.eventId}</li>
-         </ul>`
+                    await transporter.sendMail({
+    from: process.env.EMAIL_USER,
+    to: user.email,
+    subject: `Registration for ${event.name}`,
+    html: `<h3>Hello,</h3>
+           <p>You have been registered for <strong>${event.name}</strong>.</p>
+           <p>Your login details:</p>
+           <ul>
+             <li><strong>Username:</strong> ${user.username}</li>
+             <li><strong>Password:</strong> ${user.password}</li>
+             <li><strong>Event ID:</strong> ${event.eventId}</li>
+           </ul>`
 });
                 } catch(err) {
                     console.log('EMAIL ERROR FULL:', err);
